@@ -1,0 +1,142 @@
+#!/bin/bash
+
+# Device to track TX and RX per led
+# Leave empty to keep its led behaviour unchanged
+# profile: 1
+scrollock_dev=""
+numlock_dev=""
+capslock_dev=""
+compose_dev=""
+kana_dev=""
+
+# Custom triggers
+scrollock_trigger="netdev"
+numlock_trigger="netdev"
+capslock_trigger="netdev"
+compose_trigger="netdev"
+kana_trigger="netdev"
+
+# Whether to display TX and/or RX
+scrollock_tx="1"
+scrollock_rx="1"
+numlock_tx="1"
+numlock_rx="1"
+capslock_tx="1"
+capslock_rx="1"
+compose_tx="1"
+compose_rx="1"
+kana_tx="1"
+kana_rx="1"
+
+# Whether to keep led active by default if the link is up
+scrollock_link="1"
+numlock_link="1"
+capslock_link="1"
+compose_link="0"
+kana_link="0"
+
+# Blinking interval in ms. Default is 50ms
+scrollock_time="50"
+numlock_time="50"
+capslock_time="50"
+compose_time="50"
+kana_time="50"
+
+enable(){
+echo "Initializing Network Activity on Keyboard LED Indicators"
+
+# Check if led trigger module is loaded
+if [[ $(lsmod | grep -ic "ledtrig_netdev") -eq 0 ]]; then
+modprobe ledtrig_netdev
+fi
+
+for i in /sys/class/leds/input*::scrolllock/ ; do
+cd $i || break
+echo $scrollock_trigger > trigger || break
+echo $scrollock_rx > rx
+echo $scrollock_tx > tx
+echo $scrollock_dev > device_name
+echo $scrollock_time > interval
+echo $scrollock_link > link
+#echo 1 > $invert
+
+done
+
+for i in /sys/class/leds/input*::numlock/ ; do
+cd $i || break
+echo netdev > trigger || break
+echo $numlock_rx > rx
+echo $numlock_tx > tx
+echo $numlock_dev > device_name
+echo $numlock_time > interval
+echo $numlock_link > link
+done
+
+for i in /sys/class/leds/input*::capslock/ ; do
+cd $i || break
+echo netdev > trigger || break
+echo $capslock_rx > rx
+echo $capslock_tx > tx
+echo $capslock_dev > device_name
+echo $capslock_time > interval
+echo $capslock_link > link
+done
+
+for i in /sys/class/leds/input*::compose/ ; do
+cd $i || break
+echo netdev > trigger || break
+echo $compose_rx > rx
+echo $compose_tx > tx
+echo $compose_dev > device_name
+echo $compose_time > interval
+echo $compose_link > link
+done
+
+for i in /sys/class/leds/input*::kana/ ; do
+cd $i || break
+echo netdev > trigger || break
+echo $kana_rx > rx
+echo $kana_tx > tx
+echo $kana_dev > device_name
+echo $kana_time > interval
+echo $kana_link > link
+done
+
+}
+
+
+disable(){
+echo "Stopping Network Activity on Keyboard LED Indicators"
+
+for i in /sys/class/leds/input*::scrolllock/ ; do
+cd $i || break
+echo none > trigger
+done
+
+for i in /sys/class/leds/input*::numlock/ ; do
+cd $i || break
+echo none > trigger
+done
+
+for i in /sys/class/leds/input*::capslock/ ; do
+cd $i || break
+echo none > trigger
+done
+
+for i in /sys/class/leds/input*::compose/ ; do
+cd $i || break
+echo none > trigger
+done
+
+for i in /sys/class/leds/input*::kana/ ; do
+cd $i || break
+echo none > trigger
+done
+
+}
+
+case $1 in
+	enable) enable ;;
+	disable) disable ;;
+	*) echo "Use 'enable' to turn on, 'disable' to turn off network-on-keyboard led indication"
+esac

@@ -1,0 +1,7 @@
+#!/bin/bash
+# run this on user session start to disable X11-controlled keyboard led lights
+
+sleep 1
+setxkbmap -option grp_led:num
+setxkbmap -option grp_led:caps
+setxkbmap -option grp_led:scroll
